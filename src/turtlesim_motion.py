@@ -78,7 +78,7 @@ def go_to_goal_P(velocity_publisher,x_goal,y_goal):
     
     global x,y,yaw
 
-    loop_rate=rospy.Rate(10)
+    loop_rate=rospy.Rate(1)
     velocity_message=Twist()
 
     while True:
@@ -116,6 +116,48 @@ def set_desired_orientation(velocity_publisher,speed_in_degree,desired_angle_deg
     print("desired_angle_degree:",desired_angle_degree)
     rotate(velocity_publisher,speed_in_degree,math.degrees(abs(relative_angle_radians)),clockwise)
 
+def spiral(velocity_publisher,wk,rk):
+    
+    velocity_message=Twist()
+    loop_rate=rospy.Rate(1)
+
+    while((x<10.5) and (y<10.5)):
+        rk=rk+1
+        velocity_message.linear.x=rk
+        velocity_message.linear.y=0
+        velocity_message.linear.z=0
+        velocity_message.angular.x=0
+        velocity_message.angular.y=0
+        velocity_message.angular.z=wk
+        velocity_publisher.publish(velocity_message)
+        loop_rate.sleep()
+    
+    velocity_message.linear.x=0
+    velocity_message.angular.z=0
+    velocity_publisher.publish(velocity_message,0,2)
+
+def clean(velocity_publisher):
+    
+    desired_pose=Pose()
+    desired_pose.x=1
+    desired_pose.y=1
+    desired_pose.theta=0
+
+    go_to_goal_P(velocity_publisher,1,1)
+
+    set_desired_orientation(velocity_publisher,30,math.radians(desired_pose.theta))
+
+    for i in range(5):
+        move(velocity_publisher,2.0,1.0,True)
+        rotate(velocity_publisher,20,90,False)
+        move(velocity_publisher,2.0,9.0,True)
+        rotate(velocity_publisher,20,90,True)
+        move(velocity_publisher,2.0,1.0,True)
+        rotate(velocity_publisher,20,90,True)
+        move(velocity_publisher,2.0,9.0,True)
+        rotate(velocity_publisher,20,90,False)
+        pass
+
 if __name__ == '__main__':
     try:
         rospy.init_node('turtlesim_motion_pose',anonymous=True)
@@ -130,7 +172,9 @@ if __name__ == '__main__':
         #move(velocity_publisher,1.0,4.0,True)
         #rotate(velocity_publisher,90,90,True)
         #go_to_goal_P(velocity_publisher,7.0,8.0)
-        set_desired_orientation(velocity_publisher,30,270)
+        #set_desired_orientation(velocity_publisher,30,270)
+        #spiral(velocity_publisher,2,0)
+        clean(velocity_publisher)
 
     except rospy.ROSInterruptException:
         rospy.loginfo("node terminated.")
