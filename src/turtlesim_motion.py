@@ -100,8 +100,21 @@ def go_to_goal_P(velocity_publisher,x_goal,y_goal):
             break
 
 def go_to_goal_PID(velocity_publisher,x_goal,y_goal):
+    # working on
     pass
 
+def set_desired_orientation(velocity_publisher,speed_in_degree,desired_angle_degree):
+    relative_angle_radians=math.radians(desired_angle_degree)-yaw
+    clockwise=0
+
+    if relative_angle_radians<0:
+        clockwise=1
+    else:
+        clockwise=0
+    
+    print("relative_angle_radians:",math.degrees(relative_angle_radians))
+    print("desired_angle_degree:",desired_angle_degree)
+    rotate(velocity_publisher,speed_in_degree,math.degrees(abs(relative_angle_radians)),clockwise)
 
 if __name__ == '__main__':
     try:
@@ -116,7 +129,8 @@ if __name__ == '__main__':
 
         #move(velocity_publisher,1.0,4.0,True)
         #rotate(velocity_publisher,90,90,True)
-        go_to_goal_P(velocity_publisher,7.0,8.0)
+        #go_to_goal_P(velocity_publisher,7.0,8.0)
+        set_desired_orientation(velocity_publisher,30,270)
 
     except rospy.ROSInterruptException:
         rospy.loginfo("node terminated.")
