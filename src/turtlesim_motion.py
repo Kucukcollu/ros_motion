@@ -45,6 +45,34 @@ def poseCallback(pose_message):
     y=pose_message.y
     yaw=pose_message.theta
 
+def rotate(velocity_publisher,angular_speed_degree,relative_angle_degree,clockwise):
+
+    velocity_message = Twist()
+
+    angular_speed = math.radians(abs(angular_speed_degree))
+
+    if(clockwise):
+        velocity_message.angular.z=-abs(angular_speed)
+    else:
+        velocity_message.angular.z=abs(angular_speed)
+    
+    loop_rate = rospy.Rate(20)
+    t0=rospy.Time.now().to_sec()
+
+    while True:
+        rospy.loginfo("Turtlesim rotates")
+        velocity_publisher.publish(velocity_message)
+
+        t1=rospy.Time.now().to_sec()
+        current_angle_degree=(t1-t0)*angular_speed_degree
+        loop_rate.sleep()
+
+        if(current_angle_degree>relative_angle_degree):
+            rospy.loginfo("reached")
+            break
+    
+    velocity_message.angular.z=0
+    velocity_publisher.publish(velocity_message)
 
 if __name__ == '__main__':
     try:
@@ -57,7 +85,8 @@ if __name__ == '__main__':
         pose_subscriber=rospy.Subscriber(position_topic,Pose,poseCallback)
         time.sleep(2)
 
-        move(velocity_publisher,1.0,4.0,True)
+        #move(velocity_publisher,1.0,4.0,True)
+        rotate(velocity_publisher,90,90,True)
 
     except rospy.ROSInterruptException:
         rospy.loginfo("node terminated.")
